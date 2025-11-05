@@ -1,0 +1,141 @@
+/* --- Contenedores Principales --- */
+
+.pageContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center;  <-- 1. HEMOS QUITADO ESTA LÍNEA */
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
+  margin-bottom: 2rem;
+  align-self: flex-start; /* Posición Superior Izquierda */
+}
+
+/* El contenedor "celeste translúcido" del JSON */
+.formContainer {
+  background-color: rgba(255, 255, 255, 0.4); /* Celeste translúcido */
+  padding: 2rem;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 1000px; /* <-- 2. AUMENTAMOS EL ANCHO MÁXIMO */
+  margin: 0 auto; /* <-- 3. AÑADIMOS ESTA LÍNEA PARA FORZAR EL CENTRADO */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #004a99; /* Azul oscuro del JSON */
+  margin: 0;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid white;
+}
+
+/* --- Estilos del Formulario (CSS GRID) --- */
+/* ... el resto del código no cambia ... */
+.form {
+  width: 100%;
+  display: grid;
+  
+  /* Móvil: 1 columna por defecto */
+  grid-template-columns: 1fr;
+  gap: 1.2rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* --- LA MAGIA RESPONSIVE --- */
+/* Si la pantalla es más ancha de 768px (Tablets y PC) */
+@media (min-width: 768px) {
+  .form {
+    /* PC: 2 columnas */
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem; /* Más espacio en PC */
+  }
+
+  /* Clase para que un campo ocupe las 2 columnas */
+  .fullWidth {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* --- Campos y Botones (Sin cambios) --- */
+
+.label {
+  font-weight: bold;
+  color: #333;
+  margin-left: 0.5rem;
+}
+
+.input,
+.select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 20px;
+  background-color: #f0f4f8; /* Un color más claro y moderno */
+  color: #333;
+  font-size: 1rem;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+}
+
+.input::placeholder {
+  color: #aaa;
+}
+
+/* Botón "Registrarse" (azul oscuro) */
+.submitButton {
+  background-color: #004a99;
+  color: white;
+  font-weight: bold;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #003366;
+}
+
+/* Botón "Ya tengo cuenta" (azul claro) */
+.secondaryButton {
+  background-color: #b3e0f7;
+  color: #004a99;
+  font-weight: bold;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.secondaryButton:hover {
+  background-color: #9acbde;
+}

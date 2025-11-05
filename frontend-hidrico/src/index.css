@@ -66,3 +66,19 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* --- AÑADIR ESTO --- */
+  /* Fondo degradado del JSON */
+  background: linear-gradient(to bottom, #b3e0f7, #d9f2f7);
+  background-attachment: fixed; /* Evita que el degradado se mueva con el scroll */
+  min-height: 100vh;
+  width: 100%;
+}
