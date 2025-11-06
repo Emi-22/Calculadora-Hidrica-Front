@@ -1,16 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import styles from './RegistroPage.module.css';
+import styles from './LoginPage.module.css';
 
 import logoInstitucional from '../assets/logo-itl.png';
 
-export default function RegistroPage() {
+export default function LoginPage() {
     // Estados del formulario
     const [correo, setCorreo] = useState('');
-    const [sexo, setSexo] = useState('');
-    const [nivelEducativo, setNivelEducativo] = useState('');
-    const [usuario, setUsuario] = useState('');
     const [contrasena, setContrasena] = useState('');
+    const [recordarSesion, setRecordarSesion] = useState(false);
     
     // Estados para validación y feedback
     const [errors, setErrors] = useState({});
@@ -37,21 +35,6 @@ export default function RegistroPage() {
         // Validar contraseña
         if (!contrasena.trim()) {
             newErrors.contrasena = 'La contraseña es requerida';
-        } else if (contrasena.length < 8) {
-            newErrors.contrasena = 'La contraseña debe tener al menos 8 caracteres';
-        }
-
-        // Validar otros campos requeridos
-        if (!sexo) {
-            newErrors.sexo = 'Por favor selecciona tu sexo';
-        }
-
-        if (!nivelEducativo) {
-            newErrors.nivelEducativo = 'Por favor selecciona tu nivel educativo';
-        }
-
-        if (!usuario.trim()) {
-            newErrors.usuario = 'El usuario es requerido';
         }
 
         setErrors(newErrors);
@@ -76,31 +59,26 @@ export default function RegistroPage() {
             // Simular espera de 1-2 segundos
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Simular respuesta del servidor (aquí puedes cambiar la lógica según tu necesidad)
-            // Por ejemplo, simular que el usuario ya existe
+            // Simular respuesta del servidor
             const simulateSuccess = Math.random() > 0.3; // 70% de éxito
             
             if (simulateSuccess) {
                 setSubmitMessage({ 
                     type: 'success', 
-                    text: '¡Registro exitoso!' 
+                    text: '¡Inicio de sesión exitoso!' 
                 });
                 // Limpiar formulario después de éxito
                 setCorreo('');
-                setSexo('');
-                setNivelEducativo('');
-                setUsuario('');
                 setContrasena('');
                 setErrors({});
             } else {
                 setSubmitMessage({ 
                     type: 'error', 
-                    text: 'El usuario ya existe' 
+                    text: 'Credenciales incorrectas. Por favor intenta nuevamente.' 
                 });
             }
             
-            console.log('Datos listos para enviar al backend:');
-            console.log({ correo, sexo, nivelEducativo, usuario, contrasena });
+            console.log('Datos de inicio de sesión:', { correo, contrasena, recordarSesion });
         } catch (error) {
             setSubmitMessage({ 
                 type: 'error', 
@@ -130,18 +108,18 @@ export default function RegistroPage() {
     return (
         <div className={styles.pageContainer}>
             
-            {/* 2. USA TU LOGO IMPORTADO */}
+            {/* Logo Institucional */}
             <img src={logoInstitucional} alt="Logo Institucional" className={styles.logo} />
 
             {/* Contenedor del formulario centrado */}
             <div className={styles.formContainer}>
                 
-                <h2 className={styles.title}>Regístrate</h2> 
+                <h2 className={styles.title}>Inicia Sesión</h2> 
                 
                 <form onSubmit={handleSubmit} className={styles.form}>
                     
-                    {/* --- Campo Correo (Ocupa 2 columnas en PC) --- */}
-                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
+                    {/* --- Campo Correo Electrónico --- */}
+                    <div className={styles.formGroup}>
                         <label htmlFor="correo" className={styles.label}>Correo Electrónico:</label>
                         <input 
                             type="email" 
@@ -154,55 +132,8 @@ export default function RegistroPage() {
                         {errors.correo && <span className={styles.errorMessage}>{errors.correo}</span>}
                     </div>
 
-                    {/* --- Campo Sexo (Ocupa 1 columna en PC) --- */}
+                    {/* --- Campo Contraseña --- */}
                     <div className={styles.formGroup}>
-                        <label htmlFor="sexo" className={styles.label}>Sexo:</label>
-                        <select 
-                            id="sexo"
-                            className={`${styles.select} ${errors.sexo ? styles.inputError : ''}`}
-                            value={sexo}
-                            onChange={(e) => handleFieldChange('sexo', e.target.value, setSexo)}
-                        >
-                            <option value="" disabled>Elige...</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Femenino">Femenino</option>
-                        </select>
-                        {errors.sexo && <span className={styles.errorMessage}>{errors.sexo}</span>}
-                    </div>
-
-                    {/* --- Campo Nivel Educativo (Ocupa 1 columna en PC) --- */}
-                    <div className={styles.formGroup}>
-                        <label htmlFor="nivel" className={styles.label}>Nivel educativo:</label>
-                        <select 
-                            id="nivel"
-                            className={`${styles.select} ${errors.nivelEducativo ? styles.inputError : ''}`}
-                            value={nivelEducativo}
-                            onChange={(e) => handleFieldChange('nivelEducativo', e.target.value, setNivelEducativo)}
-                        >
-                            <option value="" disabled>Elige...</option>
-                            <option value="Basica">Basica</option>
-                            <option value="Media Superior">Media Superior</option>
-                            <option value="Superior">Superior</option>
-                        </select>
-                        {errors.nivelEducativo && <span className={styles.errorMessage}>{errors.nivelEducativo}</span>}
-                    </div>
-
-                    {/* --- Campo Usuario (Ocupa 2 columnas en PC) --- */}
-                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                        <label htmlFor="usuario" className={styles.label}>Usuario:</label>
-                        <input 
-                            type="text" 
-                            id="usuario"
-                            className={`${styles.input} ${errors.usuario ? styles.inputError : ''}`}
-                            placeholder="Tu nombre de usuario"
-                            value={usuario}
-                            onChange={(e) => handleFieldChange('usuario', e.target.value, setUsuario)}
-                        />
-                        {errors.usuario && <span className={styles.errorMessage}>{errors.usuario}</span>}
-                    </div>
-
-                    {/* --- Campo Contraseña (Ocupa 2 columnas en PC) --- */}
-                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
                         <label htmlFor="contrasena" className={styles.label}>Contraseña:</label>
                         <input 
                             type="password" 
@@ -215,6 +146,22 @@ export default function RegistroPage() {
                         {errors.contrasena && <span className={styles.errorMessage}>{errors.contrasena}</span>}
                     </div>
 
+                    {/* --- Opción Recordar Sesión --- */}
+                    <div className={styles.optionsRow}>
+                        <label className={styles.checkboxLabel}>
+                            <input 
+                                type="checkbox"
+                                checked={recordarSesion}
+                                onChange={(e) => setRecordarSesion(e.target.checked)}
+                                className={styles.checkbox}
+                            />
+                            <span>Recordar sesión</span>
+                        </label>
+                        <Link to="/recuperar" className={styles.forgotLink}>
+                            ¿Olvidaste tu contraseña?
+                        </Link>
+                    </div>
+
                     {/* --- Mensaje de éxito/error --- */}
                     {submitMessage.type && (
                         <div className={`${styles.submitMessage} ${styles[submitMessage.type]}`}>
@@ -222,7 +169,7 @@ export default function RegistroPage() {
                         </div>
                     )}
 
-                    {/* --- Botones (Ocupan 2 columnas en PC) --- */}
+                    {/* --- Botón de Inicio de Sesión --- */}
                     <button 
                         type="submit" 
                         className={`${styles.submitButton} ${styles.fullWidth}`}
@@ -231,18 +178,20 @@ export default function RegistroPage() {
                         {isLoading ? (
                             <span className={styles.buttonContent}>
                                 <span className={styles.spinner}></span>
-                                Enviando...
+                                Iniciando sesión...
                             </span>
                         ) : (
-                            'Registrarse'
+                            'Iniciar Sesión'
                         )}
                     </button>
-                    <Link 
-                        to="/login" 
-                        className={`${styles.secondaryButton} ${styles.fullWidth} ${styles.linkButton}`}
-                    >
-                        Ya tengo cuenta
-                    </Link> 
+
+                    {/* --- Enlace a Registro --- */}
+                    <div className={styles.registerLink}>
+                        <span>¿No tienes cuenta? </span>
+                        <Link to="/registro" className={styles.link}>
+                            Regístrate aquí
+                        </Link>
+                    </div>
                 </form>
             </div>
         </div>
