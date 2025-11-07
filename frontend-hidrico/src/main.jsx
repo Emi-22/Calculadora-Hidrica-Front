@@ -10,6 +10,7 @@ import './index.css';
 import App from './App.jsx'; // El layout principal
 import RegistroPage from './pages/RegistroPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
+import RecuperarPasswordPage from './pages/RecuperarPasswordPage.jsx';
 import PreguntasPage from './pages/PreguntasPage.jsx';
 import UsuariosPage from './pages/UsuariosPage.jsx';
 
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />,
+      },
+      {
+        path: 'recuperar',
+        element: <RecuperarPasswordPage />,
       },
       {
         path: 'preguntas',
