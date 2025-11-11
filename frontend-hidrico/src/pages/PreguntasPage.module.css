@@ -92,22 +92,6 @@
   animation: fadeIn 0.5s ease;
 }
 
-.illustrationHint {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #666;
-  font-style: italic;
-  text-align: center;
-}
-
-.arrow {
-  color: #004a99;
-  font-weight: bold;
-  font-size: 1rem;
-}
-
 .questionText {
   font-size: 1.4rem;
   font-weight: 600;
@@ -264,24 +248,34 @@
 }
 
 .thermometer {
-  width: 80px;
+  width: 90px;
   height: 300px;
   position: relative;
-  background-color: #f0f0f0;
-  border: 3px solid #ccc;
-  border-radius: 40px 40px 0 0;
+  background: linear-gradient(to bottom, 
+    rgba(255, 77, 77, 0.08) 0%, 
+    rgba(255, 77, 77, 0.08) 25%,
+    rgba(255, 215, 0, 0.08) 25%,
+    rgba(255, 215, 0, 0.08) 50%,
+    rgba(76, 175, 80, 0.08) 50%,
+    rgba(76, 175, 80, 0.08) 100%);
+  border: 3px solid #d0d0d0;
+  border-radius: 45px 45px 0 0;
   overflow: hidden;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    inset 0 0 10px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 50px;
+  box-sizing: border-box;
 }
 
 .thermometerScale {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: calc(100% - 60px);
+  left: -60px;
+  width: 50px;
+  height: 100%;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   z-index: 1;
   pointer-events: none;
 }
@@ -291,75 +285,112 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  padding-right: 8px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-left: 5px;
+  padding-bottom: 5px;
   box-sizing: border-box;
-  opacity: 0.4;
+}
+
+.scaleSegment:nth-child(1) {
+  height: 25%;
+  justify-content: flex-start;
+  padding-top: 5px;
+  padding-bottom: 0;
+}
+
+.scaleSegment:nth-child(2) {
+  height: 25%;
+  justify-content: center;
+}
+
+.scaleSegment:nth-child(3) {
+  height: 50%;
+  justify-content: flex-end;
+  padding-top: 0;
+  padding-bottom: 5px;
 }
 
 .scaleLabel {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #555;
-  margin-bottom: 2px;
-  position: absolute;
-  right: -45px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #333;
   white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.scaleSegment:nth-child(1) .scaleLabel {
+  color: #ff4d4d;
+}
+
+.scaleSegment:nth-child(2) .scaleLabel {
+  color: #ffa500;
+}
+
+.scaleSegment:nth-child(3) .scaleLabel {
+  color: #4CAF50;
 }
 
 .scalePercentage {
-  font-size: 0.65rem;
-  color: #777;
-  position: absolute;
-  right: -35px;
-  bottom: 2px;
-  white-space: nowrap;
+  font-size: 0.7rem;
+  color: #666;
+  font-weight: 600;
+  margin-top: 2px;
 }
 
 .thermometerLiquid {
   position: absolute;
-  bottom: 60px;
+  bottom: 0;
   left: 0;
+  right: 0;
   width: 100%;
-  transition: height 0.8s ease-out, background-color 0.8s ease-out;
-  border-radius: 0 0 35px 35px;
+  /* La altura se aplica dinámicamente desde JavaScript como porcentaje del contenedor */
+  /* El porcentaje representa exactamente el nivel de 0-100% sobre los 300px del termómetro */
+  transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.8s ease-out;
+  border-radius: 0 0 42px 42px;
   z-index: 2;
-  box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.1);
+  /* El gradiente se aplica dinámicamente desde JavaScript */
+  box-shadow: 
+    inset 0 -8px 15px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .thermometerBulb {
-  position: relative;
-  width: 60px;
-  height: 60px;
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  border: 3px solid #ccc;
-  background-color: #4CAF50;
-  transition: background-color 0.8s ease-out;
+  border: 4px solid #e0e0e0;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  transition: background 0.8s ease-out, box-shadow 0.8s ease-out;
   z-index: 3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.2),
+    inset 0 -5px 10px rgba(0, 0, 0, 0.1),
+    inset 0 5px 10px rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -30px;
 }
 
 .thermometerValue {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: white;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  letter-spacing: -0.5px;
 }
 
-.thermometerHint {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #666;
-  font-style: italic;
-  text-align: center;
+.thermometerLevelLabel {
+  font-size: 1.1rem;
+  font-weight: 700;
   margin-top: 0.5rem;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: color 0.8s ease-out;
 }
 
 /* Animaciones */
@@ -402,17 +433,35 @@
   }
 
   .thermometer {
-    height: 250px;
-    width: 70px;
+    height: 260px;
+    width: 80px;
+    margin-bottom: 45px;
+  }
+
+  .thermometerScale {
+    left: -50px;
+    width: 45px;
+  }
+
+  .scaleLabel {
+    font-size: 0.7rem;
+  }
+
+  .scalePercentage {
+    font-size: 0.65rem;
   }
 
   .thermometerBulb {
-    width: 50px;
-    height: 50px;
-    margin-top: -25px;
+    width: 70px;
+    height: 70px;
+    bottom: -35px;
   }
 
   .thermometerValue {
+    font-size: 1.1rem;
+  }
+
+  .thermometerLevelLabel {
     font-size: 1rem;
   }
 }
@@ -472,27 +521,266 @@
 
   .thermometer {
     height: 200px;
-    width: 60px;
+    width: 70px;
+    margin-bottom: 40px;
   }
 
-  .thermometerBulb {
+  .thermometerScale {
+    left: -45px;
     width: 40px;
-    height: 40px;
-    margin-top: -20px;
-  }
-
-  .thermometerValue {
-    font-size: 0.9rem;
   }
 
   .scaleLabel {
     font-size: 0.65rem;
-    right: -40px;
   }
 
   .scalePercentage {
-    font-size: 0.55rem;
-    right: -30px;
+    font-size: 0.6rem;
+  }
+
+  .thermometerBulb {
+    width: 60px;
+    height: 60px;
+    bottom: -30px;
+  }
+
+  .thermometerValue {
+    font-size: 1rem;
+  }
+
+  .thermometerLevelLabel {
+    font-size: 0.9rem;
+  }
+}
+
+/* --- Modal de Finalización --- */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  padding: 2rem 2rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modalIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 1rem;
+  border: 3px solid currentColor;
+  animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #004a99;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.modalBody {
+  padding: 1.5rem 2rem;
+}
+
+.modalMessage {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+
+.resultContainer {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.resultItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.resultItem:last-child {
+  border-bottom: none;
+}
+
+.resultLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.resultValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.resultBadge {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.resultDescription {
+  background: rgba(0, 74, 153, 0.05);
+  border-left: 4px solid #004a99;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-top: 1rem;
+}
+
+.resultDescription p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.modalFooter {
+  padding: 1rem 2rem 2rem;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modalButton {
+  background: linear-gradient(135deg, #004a99 0%, #0066ff 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 0.9rem 2.5rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 74, 153, 0.3);
+  min-width: 150px;
+}
+
+.modalButton:hover {
+  background: linear-gradient(135deg, #003366 0%, #004a99 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 74, 153, 0.4);
+}
+
+.modalButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 74, 153, 0.3);
+}
+
+/* Responsive para el modal */
+@media (max-width: 600px) {
+  .modalContent {
+    max-width: 100%;
+    margin: 1rem;
+    border-radius: 15px;
+  }
+
+  .modalHeader {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+
+  .modalIcon {
+    width: 70px;
+    height: 70px;
+    font-size: 2rem;
+  }
+
+  .modalTitle {
+    font-size: 1.5rem;
+  }
+
+  .modalBody {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem 1.5rem;
+  }
+
+  .resultValue {
+    font-size: 1.3rem;
+  }
+
+  .modalButton {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
   }
 }
 

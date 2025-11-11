@@ -215,6 +215,7 @@ export default function PreguntasPage() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState({});
     const [waterLevel, setWaterLevel] = useState(0);
+    const [showCompletionModal, setShowCompletionModal] = useState(false);
 
     const currentQuestion = questionsData[currentQuestionIndex];
     const selectedAnswer = answers[currentQuestion.id];
@@ -224,29 +225,35 @@ export default function PreguntasPage() {
     // Calcular nivel hídrico basado en las respuestas
     useEffect(() => {
         let totalImpact = 0;
-        let maxPossibleImpact = 0;
+        let answeredQuestionsMaxImpact = 0;
+        let allQuestionsMaxImpact = 0;
 
         questionsData.forEach(question => {
             // Calcular máximo impacto posible para esta pregunta
             const maxImpactForQuestion = Math.max(...question.options.map(opt => opt.waterImpact));
-            maxPossibleImpact += maxImpactForQuestion;
+            allQuestionsMaxImpact += maxImpactForQuestion;
 
-            // Sumar impacto de la respuesta actual si existe
+            // Si la pregunta tiene respuesta, sumar su impacto y su máximo posible
             if (answers[question.id]) {
                 const answer = answers[question.id];
                 const option = question.options.find(opt => opt.value === answer.value);
                 if (option) {
                     totalImpact += option.waterImpact;
+                    answeredQuestionsMaxImpact += maxImpactForQuestion;
                 }
             }
         });
 
-        // Calcular porcentaje (0-100)
-        const percentage = maxPossibleImpact > 0 
-            ? Math.min(100, (totalImpact / maxPossibleImpact) * 100) 
-            : 0;
+        // Calcular porcentaje basado en el consumo actual
+        // El porcentaje se calcula sobre el máximo impacto posible de todas las preguntas
+        // para mantener una escala consistente de 0-100%
+        let percentage = 0;
+        if (allQuestionsMaxImpact > 0) {
+            percentage = (totalImpact / allQuestionsMaxImpact) * 100;
+        }
         
-        setWaterLevel(percentage);
+        // Asegurar que el porcentaje esté entre 0 y 100
+        setWaterLevel(Math.min(100, Math.max(0, percentage)));
     }, [answers]);
 
     const handleAnswerChange = (questionId, value) => {
@@ -260,11 +267,41 @@ export default function PreguntasPage() {
         if (currentQuestionIndex < questionsData.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
         } else {
-            // Fin del cuestionario
-            const levelLabel = waterLevel >= 75 ? 'Crítico' : waterLevel >= 50 ? 'Medio' : 'Óptimo';
-            alert(`¡Has completado el cuestionario!\n\nTu nivel hídrico es: ${waterLevel.toFixed(1)}%\nNivel: ${levelLabel}`);
+            // Fin del cuestionario - mostrar modal
+            setShowCompletionModal(true);
         }
     };
+
+    const handleCloseModal = () => {
+        setShowCompletionModal(false);
+    };
+
+    // Efecto para manejar la tecla Escape y bloquear scroll cuando el modal está abierto
+    useEffect(() => {
+        if (showCompletionModal) {
+            // Bloquear scroll del body
+            document.body.style.overflow = 'hidden';
+            
+            // Función para cerrar con Escape
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    setShowCompletionModal(false);
+                }
+            };
+            
+            // Agregar listener
+            document.addEventListener('keydown', handleEscape);
+            
+            // Cleanup
+            return () => {
+                document.body.style.overflow = 'unset';
+                document.removeEventListener('keydown', handleEscape);
+            };
+        } else {
+            // Asegurar que el scroll esté habilitado cuando el modal está cerrado
+            document.body.style.overflow = 'unset';
+        }
+    }, [showCompletionModal]);
 
     const handlePrevious = () => {
         if (currentQuestionIndex > 0) {
@@ -286,6 +323,39 @@ export default function PreguntasPage() {
         return 'Óptimo';
     };
 
+    // Obtener el gradiente del líquido según el nivel actual
+    const getLiquidGradient = () => {
+        if (waterLevel <= 0) {
+            // Sin líquido
+            return 'transparent';
+        } else if (waterLevel < 50) {
+            // Óptimo: Solo verde (0% a waterLevel%)
+            return 'linear-gradient(to top, #4CAF50 0%, #4CAF50 100%)';
+        } else if (waterLevel < 75) {
+            // Medio: Verde desde 0% hasta 50% del nivel total, amarillo desde 50% hasta el final
+            // El agua llena desde 0% hasta waterLevel%
+            // De 0% a 50% del termómetro es verde (zona óptima)
+            // De 50% a waterLevel% del termómetro es amarillo (zona media)
+            // Pero el gradiente se aplica sobre el líquido, que va de 0% a waterLevel%
+            // Necesitamos calcular qué porcentaje del líquido corresponde a cada zona
+            const greenZoneEnd = 50; // Fin de la zona verde en el termómetro
+            const greenPercentInLiquid = (greenZoneEnd / waterLevel) * 100;
+            return `linear-gradient(to top, #4CAF50 0%, #4CAF50 ${greenPercentInLiquid}%, #ffd700 ${greenPercentInLiquid}%, #ffd700 100%)`;
+        } else {
+            // Crítico: Verde (0-50%), amarillo (50-75%), rojo (75-waterLevel%)
+            // El agua llena desde 0% hasta waterLevel%
+            // De 0% a 50% del termómetro es verde
+            // De 50% a 75% del termómetro es amarillo
+            // De 75% a waterLevel% del termómetro es rojo
+            // Necesitamos calcular qué porcentaje del líquido corresponde a cada zona
+            const greenZoneEnd = 50;
+            const yellowZoneEnd = 75;
+            const greenPercentInLiquid = (greenZoneEnd / waterLevel) * 100;
+            const yellowPercentInLiquid = (yellowZoneEnd / waterLevel) * 100;
+            return `linear-gradient(to top, #4CAF50 0%, #4CAF50 ${greenPercentInLiquid}%, #ffd700 ${greenPercentInLiquid}%, #ffd700 ${yellowPercentInLiquid}%, #ff4d4d ${yellowPercentInLiquid}%, #ff3333 100%)`;
+        }
+    };
+
     return (
         <div className={styles.pageContainer}>
             {/* Logo en la esquina superior izquierda */}
@@ -303,10 +373,6 @@ export default function PreguntasPage() {
                         <div className={styles.illustrationContainer}>
                             <div className={styles.illustration}>
                                 {currentQuestion.image}
-                            </div>
-                            <div className={styles.illustrationHint}>
-                                <span className={styles.arrow}>←</span>
-                                <span>Este cambiará dependiendo de la pregunta</span>
                             </div>
                         </div>
 
@@ -370,46 +436,126 @@ export default function PreguntasPage() {
                         <div className={styles.thermometerContainer}>
                             {/* Termómetro */}
                             <div className={styles.thermometer}>
-                                {/* Escala de colores */}
+                                {/* Escala de colores (invertida: rojo arriba, verde abajo) */}
                                 <div className={styles.thermometerScale}>
-                                    <div className={styles.scaleSegment} style={{ height: '25%', backgroundColor: '#ff4d4d' }}>
+                                    <div className={styles.scaleSegment}>
                                         <span className={styles.scaleLabel}>Crítico!</span>
-                                        <span className={styles.scalePercentage}>75%</span>
+                                        <span className={styles.scalePercentage}>75-100%</span>
                                     </div>
-                                    <div className={styles.scaleSegment} style={{ height: '25%', backgroundColor: '#ffd700' }}>
+                                    <div className={styles.scaleSegment}>
                                         <span className={styles.scaleLabel}>Medio</span>
-                                        <span className={styles.scalePercentage}>50%</span>
+                                        <span className={styles.scalePercentage}>50-75%</span>
                                     </div>
-                                    <div className={styles.scaleSegment} style={{ height: '50%', backgroundColor: '#4CAF50' }}>
+                                    <div className={styles.scaleSegment}>
                                         <span className={styles.scaleLabel}>Óptimo</span>
-                                        <span className={styles.scalePercentage}>25%</span>
+                                        <span className={styles.scalePercentage}>0-50%</span>
                                     </div>
                                 </div>
 
                                 {/* Líquido del termómetro */}
-                                <div 
-                                    className={styles.thermometerLiquid}
-                                    style={{ 
-                                        height: `${waterLevel}%`,
-                                        backgroundColor: getWaterLevelColor()
-                                    }}
-                                />
+                                {waterLevel > 0 && (
+                                    <div 
+                                        className={styles.thermometerLiquid}
+                                        style={{ 
+                                            height: `${waterLevel}%`,
+                                            background: getLiquidGradient()
+                                        }}
+                                    />
+                                )}
                             </div>
 
                             {/* Valor numérico y bulbo */}
-                            <div className={styles.thermometerBulb} style={{ backgroundColor: getWaterLevelColor() }}>
+                            <div 
+                                className={styles.thermometerBulb} 
+                                style={{ 
+                                    background: waterLevel >= 75 
+                                        ? 'linear-gradient(135deg, #ff4d4d, #ff3333)'
+                                        : waterLevel >= 50 
+                                        ? 'linear-gradient(135deg, #ffd700, #ffa500)'
+                                        : 'linear-gradient(135deg, #4CAF50, #45a049)'
+                                }}
+                            >
                                 <span className={styles.thermometerValue}>{waterLevel.toFixed(0)}%</span>
                             </div>
-                        </div>
-
-                        {/* Texto de ayuda */}
-                        <div className={styles.thermometerHint}>
-                            <span className={styles.arrow}>←</span>
-                            <span>Este aumentará conforme respuestas</span>
+                            
+                            {/* Etiqueta del nivel */}
+                            <div className={styles.thermometerLevelLabel} style={{ color: getWaterLevelColor() }}>
+                                {getWaterLevelLabel()}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {/* Modal de finalización */}
+            {showCompletionModal && (
+                <div className={styles.modalOverlay} onClick={handleCloseModal}>
+                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div className={styles.modalIcon} style={{ 
+                                backgroundColor: waterLevel >= 75 
+                                    ? 'rgba(255, 77, 77, 0.1)' 
+                                    : waterLevel >= 50 
+                                    ? 'rgba(255, 215, 0, 0.1)' 
+                                    : 'rgba(76, 175, 80, 0.1)',
+                                color: getWaterLevelColor()
+                            }}>
+                                {waterLevel >= 75 ? '⚠️' : waterLevel >= 50 ? '⚡' : '✓'}
+                            </div>
+                            <h2 className={styles.modalTitle}>¡Encuesta Completada!</h2>
+                        </div>
+
+                        <div className={styles.modalBody}>
+                            <p className={styles.modalMessage}>
+                                Has completado exitosamente el cuestionario de huella hídrica.
+                            </p>
+                            
+                            <div className={styles.resultContainer}>
+                                <div className={styles.resultItem}>
+                                    <span className={styles.resultLabel}>Nivel Hídrico:</span>
+                                    <span 
+                                        className={styles.resultValue}
+                                        style={{ color: getWaterLevelColor() }}
+                                    >
+                                        {waterLevel.toFixed(1)}%
+                                    </span>
+                                </div>
+                                <div className={styles.resultItem}>
+                                    <span className={styles.resultLabel}>Estado:</span>
+                                    <span 
+                                        className={styles.resultBadge}
+                                        style={{ 
+                                            backgroundColor: getWaterLevelColor(),
+                                            color: 'white'
+                                        }}
+                                    >
+                                        {getWaterLevelLabel()}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className={styles.resultDescription}>
+                                {waterLevel >= 75 ? (
+                                    <p>Tu consumo de agua es crítico. Te recomendamos implementar medidas de ahorro urgentes.</p>
+                                ) : waterLevel >= 50 ? (
+                                    <p>Tu consumo de agua es moderado. Hay espacio para mejorar y optimizar tu uso del agua.</p>
+                                ) : (
+                                    <p>¡Excelente! Tu consumo de agua es óptimo. Sigue manteniendo estas buenas prácticas.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className={styles.modalFooter}>
+                            <button 
+                                className={styles.modalButton}
+                                onClick={handleCloseModal}
+                            >
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
