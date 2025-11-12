@@ -1,14 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 
 import logoInstitucional from '../assets/logo-itl.png';
 
 export default function LoginPage() {
-    const { login } = useAuth();
-    const navigate = useNavigate();
-    
     // Estados del formulario
     const [correo, setCorreo] = useState('');
     const [contrasena, setContrasena] = useState('');
@@ -63,71 +59,26 @@ export default function LoginPage() {
             // Simular espera de 1-2 segundos
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Simular autenticación: verificar usuarios en localStorage
-            const savedUsuarios = localStorage.getItem('usuarios');
-            let usuarios = [];
-            if (savedUsuarios) {
-                usuarios = JSON.parse(savedUsuarios);
-            }
+            // Simular respuesta del servidor
+            const simulateSuccess = Math.random() > 0.3; // 70% de éxito
             
-            // Buscar usuario por correo y contraseña
-            const usuarioEncontrado = usuarios.find(
-                u => u.correo === correo && u.contrasena === contrasena
-            );
-            
-            // Si no se encuentra, usar credenciales por defecto para admin
-            if (!usuarioEncontrado) {
-                // Credenciales por defecto para administrador
-                if (correo === 'admin@example.com' && contrasena === 'admin123') {
-                    const adminUser = {
-                        id: 1,
-                        usuario: 'admin',
-                        correo: 'admin@example.com',
-                        rol: 'administrador'
-                    };
-                    login(adminUser);
-                    setSubmitMessage({ 
-                        type: 'success', 
-                        text: '¡Inicio de sesión exitoso!' 
-                    });
-                    setTimeout(() => {
-                        navigate('/usuarios');
-                    }, 1000);
-                } else {
-                    setSubmitMessage({ 
-                        type: 'error', 
-                        text: 'Credenciales incorrectas. Por favor intenta nuevamente.' 
-                    });
-                }
-            } else {
-                // Usuario encontrado en la lista
-                const userData = {
-                    id: usuarioEncontrado.id,
-                    usuario: usuarioEncontrado.usuario,
-                    correo: usuarioEncontrado.correo,
-                    rol: usuarioEncontrado.rol
-                };
-                login(userData);
+            if (simulateSuccess) {
                 setSubmitMessage({ 
                     type: 'success', 
                     text: '¡Inicio de sesión exitoso!' 
                 });
-                setTimeout(() => {
-                    // Redirigir según el rol
-                    if (userData.rol === 'administrador') {
-                        navigate('/usuarios');
-                    } else {
-                        navigate('/preguntas');
-                    }
-                }, 1000);
-            }
-            
-            // Limpiar formulario después de éxito
-            if (usuarioEncontrado || (correo === 'admin@example.com' && contrasena === 'admin123')) {
+                // Limpiar formulario después de éxito
                 setCorreo('');
                 setContrasena('');
                 setErrors({});
+            } else {
+                setSubmitMessage({ 
+                    type: 'error', 
+                    text: 'Credenciales incorrectas. Por favor intenta nuevamente.' 
+                });
             }
+            
+            console.log('Datos de inicio de sesión:', { correo, contrasena, recordarSesion });
         } catch (error) {
             setSubmitMessage({ 
                 type: 'error', 

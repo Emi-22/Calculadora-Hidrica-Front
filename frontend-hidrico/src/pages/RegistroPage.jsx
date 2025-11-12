@@ -76,44 +76,15 @@ export default function RegistroPage() {
             // Simular espera de 1-2 segundos
             await new Promise(resolve => setTimeout(resolve, 1500));
             
-            // Verificar si el usuario o correo ya existe
-            const savedUsuarios = localStorage.getItem('usuarios');
-            let usuarios = [];
-            if (savedUsuarios) {
-                usuarios = JSON.parse(savedUsuarios);
-            }
+            // Simular respuesta del servidor (aquí puedes cambiar la lógica según tu necesidad)
+            // Por ejemplo, simular que el usuario ya existe
+            const simulateSuccess = Math.random() > 0.3; // 70% de éxito
             
-            // Verificar si el correo o usuario ya existe
-            const usuarioExiste = usuarios.some(
-                u => u.correo === correo || u.usuario === usuario
-            );
-            
-            if (usuarioExiste) {
-                setSubmitMessage({ 
-                    type: 'error', 
-                    text: 'El usuario o correo ya existe' 
-                });
-            } else {
-                // Crear nuevo usuario
-                const nuevoUsuario = {
-                    id: Date.now(),
-                    usuario: usuario,
-                    correo: correo,
-                    contrasena: contrasena,
-                    rol: 'usuario', // Por defecto todos son usuarios
-                    sexo: sexo.toLowerCase(),
-                    nivelEducativo: nivelEducativo.toLowerCase(),
-                    fechaRegistro: new Date().toISOString()
-                };
-                
-                usuarios.push(nuevoUsuario);
-                localStorage.setItem('usuarios', JSON.stringify(usuarios));
-                
+            if (simulateSuccess) {
                 setSubmitMessage({ 
                     type: 'success', 
-                    text: '¡Registro exitoso! Ahora puedes iniciar sesión.' 
+                    text: '¡Registro exitoso!' 
                 });
-                
                 // Limpiar formulario después de éxito
                 setCorreo('');
                 setSexo('');
@@ -121,7 +92,15 @@ export default function RegistroPage() {
                 setUsuario('');
                 setContrasena('');
                 setErrors({});
+            } else {
+                setSubmitMessage({ 
+                    type: 'error', 
+                    text: 'El usuario ya existe' 
+                });
             }
+            
+            console.log('Datos listos para enviar al backend:');
+            console.log({ correo, sexo, nivelEducativo, usuario, contrasena });
         } catch (error) {
             setSubmitMessage({ 
                 type: 'error', 

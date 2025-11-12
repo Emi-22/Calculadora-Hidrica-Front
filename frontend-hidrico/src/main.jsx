@@ -6,9 +6,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 // Importa los estilos globales (Vite ya lo incluye)
 import './index.css';
 
-// Importa el contexto de autenticación
-import { AuthProvider } from './context/AuthContext';
-
 // Importa los componentes de las rutas
 import App from './App.jsx'; // El layout principal
 import RegistroPage from './pages/RegistroPage.jsx';
@@ -16,7 +13,6 @@ import LoginPage from './pages/LoginPage.jsx';
 import RecuperarPasswordPage from './pages/RecuperarPasswordPage.jsx';
 import PreguntasPage from './pages/PreguntasPage.jsx';
 import UsuariosPage from './pages/UsuariosPage.jsx';
-import ProtectedRoute from './components/ProtectedRoute';
 
 // RNF01: Implementación del enrutamiento
 const router = createBrowserRouter([
@@ -42,11 +38,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'usuarios',
-        element: (
-          <ProtectedRoute requireAdmin={true}>
-            <UsuariosPage />
-          </ProtectedRoute>
-        ),
+        element: <UsuariosPage />,
       },
       {
         // Opcional: Una ruta "índice" que se muestre en "/"
@@ -61,8 +53,6 @@ const router = createBrowserRouter([
 // Inicia la aplicación
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
