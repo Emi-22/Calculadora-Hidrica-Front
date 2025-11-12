@@ -10,10 +10,16 @@ function App() {
     <div className={styles.appContainer}>
       {/* RF10: Menú superior con enlaces */}
       <nav className={styles.nav}>
-        <Link to="/registro" className={styles.navLink}>
+        <Link 
+          to="/registro" 
+          className={`${styles.navLink} ${isActive('/registro') ? styles.active : ''}`}
+        >
           Registro
         </Link>
-        <Link to="/preguntas" className={styles.navLink}>
+        <Link 
+          to="/preguntas" 
+          className={`${styles.navLink} ${isActive('/preguntas') ? styles.active : ''}`}
+        >
           Preguntas
         </Link>
         {!isLoading && isAdmin && (
