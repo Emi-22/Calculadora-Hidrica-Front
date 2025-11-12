@@ -12,6 +12,10 @@ function App() {
     return location.pathname === path;
   };
 
+  const isActive = (path) => {
+    return window.location.pathname === path;
+  }
+
   return (
     <div className={styles.appContainer}>
       {/* RF10: Menú superior con enlaces */}
