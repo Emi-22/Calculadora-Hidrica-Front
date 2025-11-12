@@ -1,10 +1,16 @@
 // src/App.jsx
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import styles from './App.module.css';
 
 function App() {
   const { user, isAdmin, logout, isLoading } = useAuth();
+  const location = useLocation();
+
+  // Función para verificar si una ruta está activa
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
 
   return (
     <div className={styles.appContainer}>
@@ -23,7 +29,10 @@ function App() {
           Preguntas
         </Link>
         {!isLoading && isAdmin && (
-          <Link to="/usuarios" className={styles.navLink}>
+          <Link 
+            to="/usuarios" 
+            className={`${styles.navLink} ${isActive('/usuarios') ? styles.active : ''}`}
+          >
             Usuarios
           </Link>
         )}
@@ -37,7 +46,10 @@ function App() {
             </button>
           </>
         ) : !isLoading ? (
-          <Link to="/login" className={styles.navLink}>
+          <Link 
+            to="/login" 
+            className={`${styles.navLink} ${isActive('/login') ? styles.active : ''}`}
+          >
             Iniciar Sesión
           </Link>
         ) : null}
