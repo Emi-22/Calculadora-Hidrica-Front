@@ -6,6 +6,10 @@ import styles from './App.module.css';
 function App() {
   const { user, isAdmin, logout, isLoading } = useAuth();
 
+  const isActive = (path) => {
+    return window.location.pathname === path;
+  }
+
   return (
     <div className={styles.appContainer}>
       {/* RF10: Menú superior con enlaces */}
