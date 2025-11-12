@@ -463,24 +463,18 @@ export default function PreguntasPage() {
                                     />
                                 )}
                             </div>
-
-                            {/* Valor numérico y bulbo */}
-                            <div 
-                                className={styles.thermometerBulb} 
-                                style={{ 
-                                    background: waterLevel >= 75 
-                                        ? 'linear-gradient(135deg, #ff4d4d, #ff3333)'
-                                        : waterLevel >= 50 
-                                        ? 'linear-gradient(135deg, #ffd700, #ffa500)'
-                                        : 'linear-gradient(135deg, #4CAF50, #45a049)'
-                                }}
-                            >
-                                <span className={styles.thermometerValue}>{waterLevel.toFixed(0)}%</span>
-                            </div>
                             
                             {/* Etiqueta del nivel */}
                             <div className={styles.thermometerLevelLabel} style={{ color: getWaterLevelColor() }}>
                                 {getWaterLevelLabel()}
+                            </div>
+                            
+                            {/* Porcentaje debajo del indicador */}
+                            <div className={styles.percentageDisplay} style={{ 
+                                backgroundColor: getWaterLevelColor(),
+                                color: 'white'
+                            }}>
+                                {waterLevel.toFixed(0)}%
                             </div>
                         </div>
                     </div>
