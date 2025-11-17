@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../services/apiClient';
 import styles from './RegistroPage.module.css';
 
 import logoInstitucional from '../assets/logo-itl.png';
 
 export default function RegistroPage() {
+    const navigate = useNavigate();
+    
     // Estados del formulario
     const [correo, setCorreo] = useState('');
     const [sexo, setSexo] = useState('');
@@ -69,63 +72,49 @@ export default function RegistroPage() {
             return;
         }
 
-        // Simular envío con estado de carga
+        // Estado de carga
         setIsLoading(true);
         
         try {
-            // Simular espera de 1-2 segundos
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // Preparar datos según lo que espera el backend
+            // El backend espera: nombre, email, password, sexo, nivel_educativo
+            const registroData = {
+                nombre: usuario, // El backend usa "nombre" en lugar de "usuario"
+                email: correo,   // El backend usa "email" en lugar de "correo"
+                password: contrasena, // El backend usa "password" en lugar de "contrasena"
+                sexo: sexo.toLowerCase(), // El backend normaliza a minúsculas
+                nivel_educativo: nivelEducativo.toLowerCase().replace(/\s+/g, '_'), // Normalizar espacios
+            };
             
-            // Verificar si el usuario o correo ya existe
-            const savedUsuarios = localStorage.getItem('usuarios');
-            let usuarios = [];
-            if (savedUsuarios) {
-                usuarios = JSON.parse(savedUsuarios);
-            }
+            // Llamar al backend para registrar
+            const response = await api.registro(registroData);
             
-            // Verificar si el correo o usuario ya existe
-            const usuarioExiste = usuarios.some(
-                u => u.correo === correo || u.usuario === usuario
-            );
+            // Si el registro fue exitoso
+            setSubmitMessage({ 
+                type: 'success', 
+                text: '¡Registro exitoso! Redirigiendo al login...' 
+            });
             
-            if (usuarioExiste) {
-                setSubmitMessage({ 
-                    type: 'error', 
-                    text: 'El usuario o correo ya existe' 
-                });
-            } else {
-                // Crear nuevo usuario
-                const nuevoUsuario = {
-                    id: Date.now(),
-                    usuario: usuario,
-                    correo: correo,
-                    contrasena: contrasena,
-                    rol: 'usuario', // Por defecto todos son usuarios
-                    sexo: sexo.toLowerCase(),
-                    nivelEducativo: nivelEducativo.toLowerCase(),
-                    fechaRegistro: new Date().toISOString()
-                };
-                
-                usuarios.push(nuevoUsuario);
-                localStorage.setItem('usuarios', JSON.stringify(usuarios));
-                
-                setSubmitMessage({ 
-                    type: 'success', 
-                    text: '¡Registro exitoso! Ahora puedes iniciar sesión.' 
-                });
-                
-                // Limpiar formulario después de éxito
-                setCorreo('');
-                setSexo('');
-                setNivelEducativo('');
-                setUsuario('');
-                setContrasena('');
-                setErrors({});
-            }
+            // Limpiar formulario
+            setCorreo('');
+            setSexo('');
+            setNivelEducativo('');
+            setUsuario('');
+            setContrasena('');
+            setErrors({});
+            
+            // Redirigir al login después de un breve delay
+            setTimeout(() => {
+                navigate('/login');
+            }, 2000);
+            
         } catch (error) {
+            console.error('Error en registro:', error);
+            // El backend devuelve mensajes específicos en error.message o error.data.message
+            const errorMessage = error.data?.message || error.message || 'Ocurrió un error. Por favor intenta nuevamente.';
             setSubmitMessage({ 
                 type: 'error', 
-                text: 'Ocurrió un error. Por favor intenta nuevamente.' 
+                text: errorMessage 
             });
         } finally {
             setIsLoading(false);
@@ -185,8 +174,10 @@ export default function RegistroPage() {
                             onChange={(e) => handleFieldChange('sexo', e.target.value, setSexo)}
                         >
                             <option value="" disabled>Elige...</option>
-                            <option value="Masculino">Masculino</option>
-                            <option value="Femenino">Femenino</option>
+                            <option value="masculino">Masculino</option>
+                            <option value="femenino">Femenino</option>
+                            <option value="otro">Otro</option>
+                            <option value="prefiero_no_decir">Prefiero no decir</option>
                         </select>
                         {errors.sexo && <span className={styles.errorMessage}>{errors.sexo}</span>}
                     </div>
@@ -201,9 +192,12 @@ export default function RegistroPage() {
                             onChange={(e) => handleFieldChange('nivelEducativo', e.target.value, setNivelEducativo)}
                         >
                             <option value="" disabled>Elige...</option>
-                            <option value="Basica">Basica</option>
-                            <option value="Media Superior">Media Superior</option>
-                            <option value="Superior">Superior</option>
+                            <option value="primaria">Primaria</option>
+                            <option value="secundaria">Secundaria</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="universitario">Universitario</option>
+                            <option value="postgrado">Postgrado</option>
+                            <option value="otro">Otro</option>
                         </select>
                         {errors.nivelEducativo && <span className={styles.errorMessage}>{errors.nivelEducativo}</span>}
                     </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { api } from '../services/apiClient';
 import styles from './RecuperarPasswordPage.module.css';
 
 import logoInstitucional from '../assets/logo-itl.png';
@@ -45,37 +46,25 @@ export default function RecuperarPasswordPage() {
             return;
         }
 
-        // Simular envío con estado de carga
+        // Enviar solicitud al backend
         setIsLoading(true);
         
         try {
-            // Simular espera de 1-2 segundos
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            await api.forgotPassword(correo);
             
-            // Simular respuesta del servidor
-            const simulateSuccess = Math.random() > 0.2; // 80% de éxito
-            
-            if (simulateSuccess) {
-                setEmailSent(true);
-                setSubmitMessage({ 
-                    type: 'success', 
-                    text: 'Se ha enviado un enlace de recuperación a tu correo electrónico.' 
-                });
-                // Limpiar formulario después de éxito
-                setCorreo('');
-                setErrors({});
-            } else {
-                setSubmitMessage({ 
-                    type: 'error', 
-                    text: 'No se encontró una cuenta asociada a este correo electrónico.' 
-                });
-            }
-            
-            console.log('Solicitud de recuperación de contraseña para:', correo);
+            setEmailSent(true);
+            setSubmitMessage({ 
+                type: 'success', 
+                text: 'Si el correo existe, se ha enviado un enlace de recuperación a tu correo electrónico.' 
+            });
+            // Limpiar formulario después de éxito
+            setCorreo('');
+            setErrors({});
         } catch (error) {
+            console.error('Error al solicitar recuperación:', error);
             setSubmitMessage({ 
                 type: 'error', 
-                text: 'Ocurrió un error. Por favor intenta nuevamente.' 
+                text: error.message || 'Ocurrió un error. Por favor intenta nuevamente.' 
             });
         } finally {
             setIsLoading(false);

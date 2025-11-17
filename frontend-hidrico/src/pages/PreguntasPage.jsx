@@ -1,234 +1,98 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../services/apiClient';
 import styles from './PreguntasPage.module.css';
 
 import logoInstitucional from '../assets/logo-itl.png';
 
-// Datos de las preguntas con sus opciones e impacto hídrico
-const questionsData = [
-    {
-        id: 1,
-        text: "¿Cuántos litros de agua estimas en tu consumo al día?",
-        image: "💧",
-        options: [
-            { label: "Menos de 50 litros", value: 1, waterImpact: 10 },
-            { label: "50-100 litros", value: 2, waterImpact: 25 },
-            { label: "100-200 litros", value: 3, waterImpact: 50 },
-            { label: "Más de 200 litros", value: 4, waterImpact: 80 },
-        ],
-    },
-    {
-        id: 2,
-        text: "¿Cuántas veces al día te duchas?",
-        image: "🚿",
-        options: [
-            { label: "1 vez", value: 1, waterImpact: 15 },
-            { label: "2 veces", value: 2, waterImpact: 35 },
-            { label: "3 o más veces", value: 3, waterImpact: 60 },
-        ],
-    },
-    {
-        id: 3,
-        text: "¿Cuánto dura cada ducha?",
-        image: "⏱️",
-        options: [
-            { label: "Menos de 5 minutos", value: 1, waterImpact: 10 },
-            { label: "5-10 minutos", value: 2, waterImpact: 25 },
-            { label: "10-15 minutos", value: 3, waterImpact: 45 },
-            { label: "Más de 15 minutos", value: 4, waterImpact: 70 },
-        ],
-    },
-    {
-        id: 4,
-        text: "¿Usas regadera de ahorro o convencional?",
-        image: "🚿",
-        options: [
-            { label: "Regadera de ahorro", value: 1, waterImpact: 5 },
-            { label: "Regadera convencional", value: 2, waterImpact: 30 },
-        ],
-    },
-    {
-        id: 5,
-        text: "¿Cuántas veces al día lavas tus dientes?",
-        image: "🦷",
-        options: [
-            { label: "1 vez", value: 1, waterImpact: 5 },
-            { label: "2 veces", value: 2, waterImpact: 10 },
-            { label: "3 o más veces", value: 3, waterImpact: 20 },
-        ],
-    },
-    {
-        id: 6,
-        text: "¿Dejas la llave abierta?",
-        image: "🚰",
-        options: [
-            { label: "Siempre la cierro", value: 1, waterImpact: 5 },
-            { label: "A veces la dejo abierta", value: 2, waterImpact: 20 },
-            { label: "Casi siempre la dejo abierta", value: 3, waterImpact: 40 },
-        ],
-    },
-    {
-        id: 7,
-        text: "¿Cuántas veces al día utilizas el inodoro?",
-        image: "🚽",
-        options: [
-            { label: "1-3 veces", value: 1, waterImpact: 10 },
-            { label: "4-6 veces", value: 2, waterImpact: 25 },
-            { label: "Más de 6 veces", value: 3, waterImpact: 45 },
-        ],
-    },
-    {
-        id: 8,
-        text: "¿Tu inodoro es de descarga ahorradora o convencional?",
-        image: "🚽",
-        options: [
-            { label: "Ahorradora", value: 1, waterImpact: 5 },
-            { label: "Convencional", value: 2, waterImpact: 30 },
-        ],
-    },
-    {
-        id: 9,
-        text: "¿Cuántas veces por semana lavas los trastes?",
-        image: "🍽️",
-        options: [
-            { label: "1-2 veces", value: 1, waterImpact: 10 },
-            { label: "3-4 veces", value: 2, waterImpact: 20 },
-            { label: "5-7 veces", value: 3, waterImpact: 35 },
-            { label: "Más de 7 veces", value: 4, waterImpact: 50 },
-        ],
-    },
-    {
-        id: 10,
-        text: "¿Enjabonas con la llave abierta o cerrada?",
-        image: "🧽",
-        options: [
-            { label: "Siempre cerrada", value: 1, waterImpact: 5 },
-            { label: "A veces abierta", value: 2, waterImpact: 20 },
-            { label: "Casi siempre abierta", value: 3, waterImpact: 40 },
-        ],
-    },
-    {
-        id: 11,
-        text: "¿Cuántas veces lavas por semana tu ropa?",
-        image: "👕",
-        options: [
-            { label: "1-2 veces", value: 1, waterImpact: 15 },
-            { label: "3-4 veces", value: 2, waterImpact: 35 },
-            { label: "5-7 veces", value: 3, waterImpact: 60 },
-            { label: "Más de 7 veces", value: 4, waterImpact: 85 },
-        ],
-    },
-    {
-        id: 12,
-        text: "¿Tu lavadora es de alta eficiencia o convencional?",
-        image: "🧺",
-        options: [
-            { label: "Alta eficiencia", value: 1, waterImpact: 10 },
-            { label: "Convencional", value: 2, waterImpact: 40 },
-        ],
-    },
-    {
-        id: 13,
-        text: "¿Cuántas veces a la semana trapeas o limpias pisos haciendo uso de agua?",
-        image: "🧹",
-        options: [
-            { label: "1-2 veces", value: 1, waterImpact: 10 },
-            { label: "3-4 veces", value: 2, waterImpact: 20 },
-            { label: "5-7 veces", value: 3, waterImpact: 35 },
-            { label: "Más de 7 veces", value: 4, waterImpact: 50 },
-        ],
-    },
-    {
-        id: 14,
-        text: "¿Consumes agua embotellada regularmente?",
-        image: "🥤",
-        options: [
-            { label: "Nunca", value: 1, waterImpact: 5 },
-            { label: "Ocasionalmente", value: 2, waterImpact: 20 },
-            { label: "Frecuentemente", value: 3, waterImpact: 45 },
-            { label: "Siempre", value: 4, waterImpact: 70 },
-        ],
-    },
-    {
-        id: 15,
-        text: "¿Tienes automóvil propio?",
-        image: "🚗",
-        options: [
-            { label: "No", value: 1, waterImpact: 0 },
-            { label: "Sí", value: 2, waterImpact: 30 },
-        ],
-    },
-    {
-        id: 16,
-        text: "¿Cuántas veces al mes lo lavas?",
-        image: "🚗",
-        options: [
-            { label: "No aplica", value: 1, waterImpact: 0 },
-            { label: "1-2 veces", value: 2, waterImpact: 15 },
-            { label: "3-4 veces", value: 3, waterImpact: 30 },
-            { label: "Más de 4 veces", value: 4, waterImpact: 50 },
-        ],
-    },
-    {
-        id: 17,
-        text: "¿Aproximadamente cuántas veces por mes consumes carne para alimentarte?",
-        image: "🥩",
-        options: [
-            { label: "Nunca (vegetariano/vegano)", value: 1, waterImpact: 5 },
-            { label: "1-5 veces", value: 2, waterImpact: 20 },
-            { label: "6-15 veces", value: 3, waterImpact: 45 },
-            { label: "Más de 15 veces", value: 4, waterImpact: 75 },
-        ],
-    },
-    {
-        id: 18,
-        text: "¿Sales regularmente de fiesta?",
-        image: "🎉",
-        options: [
-            { label: "Nunca", value: 1, waterImpact: 5 },
-            { label: "Ocasionalmente", value: 2, waterImpact: 20 },
-            { label: "Frecuentemente", value: 3, waterImpact: 40 },
-        ],
-    },
-    {
-        id: 19,
-        text: "¿Consumes bebidas alcohólicas?",
-        image: "🍺",
-        options: [
-            { label: "No", value: 1, waterImpact: 5 },
-            { label: "Sí", value: 2, waterImpact: 30 },
-        ],
-    },
-    {
-        id: 20,
-        text: "¿Cuál es tu consumo estimado de bebidas alcohólicas por reunión?",
-        image: "🍷",
-        options: [
-            { label: "No aplica", value: 1, waterImpact: 0 },
-            { label: "1-2 bebidas", value: 2, waterImpact: 15 },
-            { label: "3-4 bebidas", value: 3, waterImpact: 35 },
-            { label: "Más de 4 bebidas", value: 4, waterImpact: 60 },
-        ],
-    },
-];
+// Mapeo de emojis para las preguntas basado en palabras clave
+const getEmojiForQuestion = (texto) => {
+    const textoLower = texto.toLowerCase();
+    if (textoLower.includes('agua') || textoLower.includes('litros') || textoLower.includes('consumo')) return '💧';
+    if (textoLower.includes('ducha') || textoLower.includes('duchas')) return '🚿';
+    if (textoLower.includes('tiempo') || textoLower.includes('minutos') || textoLower.includes('dura')) return '⏱️';
+    if (textoLower.includes('dientes') || textoLower.includes('dental')) return '🦷';
+    if (textoLower.includes('llave') || textoLower.includes('grifo')) return '🚰';
+    if (textoLower.includes('inodoro') || textoLower.includes('baño')) return '🚽';
+    if (textoLower.includes('trastes') || textoLower.includes('platos') || textoLower.includes('lavar')) return '🍽️';
+    if (textoLower.includes('enjabon') || textoLower.includes('jabón')) return '🧽';
+    if (textoLower.includes('ropa') || textoLower.includes('lavar ropa')) return '👕';
+    if (textoLower.includes('lavadora')) return '🧺';
+    if (textoLower.includes('trapear') || textoLower.includes('pisos') || textoLower.includes('limpiar')) return '🧹';
+    if (textoLower.includes('embotellada') || textoLower.includes('botella')) return '🥤';
+    if (textoLower.includes('automóvil') || textoLower.includes('auto') || textoLower.includes('carro')) return '🚗';
+    if (textoLower.includes('carne')) return '🥩';
+    if (textoLower.includes('fiesta') || textoLower.includes('reunión')) return '🎉';
+    if (textoLower.includes('alcohólicas') || textoLower.includes('alcohol')) return '🍺';
+    if (textoLower.includes('bebidas')) return '🍷';
+    return '💧'; // default
+};
 
 export default function PreguntasPage() {
+    const { user, isAdmin } = useAuth();
+    const navigate = useNavigate();
+    const [preguntas, setPreguntas] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState({});
     const [waterLevel, setWaterLevel] = useState(0);
     const [showCompletionModal, setShowCompletionModal] = useState(false);
+    const [showCompletionScreen, setShowCompletionScreen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
 
-    const currentQuestion = questionsData[currentQuestionIndex];
-    const selectedAnswer = answers[currentQuestion.id];
-    const totalQuestions = questionsData.length;
+    // Cargar preguntas desde el backend
+    useEffect(() => {
+        const loadPreguntas = async () => {
+            try {
+                setIsLoading(true);
+                setError(null);
+                const data = await api.getPreguntas();
+                
+                // Mapear datos del backend al formato que espera el componente
+                const preguntasMapeadas = data.map((pregunta) => {
+                    return {
+                        id: pregunta.id,
+                        codigo: pregunta.codigo,
+                        text: pregunta.texto,
+                        image: getEmojiForQuestion(pregunta.texto),
+                        options: pregunta.opciones.map((opcion) => ({
+                            id: opcion.id,
+                            label: opcion.texto,
+                            value: opcion.id, // Usar el ID de la opción como valor
+                            waterImpact: opcion.valor_consumo || 0, // Usar el valor real del backend
+                        }))
+                    };
+                });
+                
+                setPreguntas(preguntasMapeadas);
+            } catch (err) {
+                console.error('Error al cargar preguntas:', err);
+                setError('Error al cargar las preguntas. Por favor, recarga la página.');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadPreguntas();
+    }, []);
+
+    const currentQuestion = preguntas[currentQuestionIndex];
+    const selectedAnswer = currentQuestion ? answers[currentQuestion.id] : null;
+    const totalQuestions = preguntas.length;
     const answeredQuestions = Object.keys(answers).length;
 
     // Calcular nivel hídrico basado en las respuestas
     useEffect(() => {
+        if (preguntas.length === 0) return;
+        
         let totalImpact = 0;
         let answeredQuestionsMaxImpact = 0;
         let allQuestionsMaxImpact = 0;
 
-        questionsData.forEach(question => {
+        preguntas.forEach(question => {
             // Calcular máximo impacto posible para esta pregunta
             const maxImpactForQuestion = Math.max(...question.options.map(opt => opt.waterImpact));
             allQuestionsMaxImpact += maxImpactForQuestion;
@@ -254,7 +118,7 @@ export default function PreguntasPage() {
         
         // Asegurar que el porcentaje esté entre 0 y 100
         setWaterLevel(Math.min(100, Math.max(0, percentage)));
-    }, [answers]);
+    }, [answers, preguntas]);
 
     const handleAnswerChange = (questionId, value) => {
         setAnswers(prev => ({
@@ -263,17 +127,63 @@ export default function PreguntasPage() {
         }));
     };
 
-    const handleNext = () => {
-        if (currentQuestionIndex < questionsData.length - 1) {
+    const handleNext = async () => {
+        if (currentQuestionIndex < preguntas.length - 1) {
             setCurrentQuestionIndex(prev => prev + 1);
         } else {
-            // Fin del cuestionario - mostrar modal
+            // Fin del cuestionario - guardar respuestas y mostrar modal
+            await handleSaveAnswers();
             setShowCompletionModal(true);
+        }
+    };
+
+    // Guardar respuestas en el backend
+    const handleSaveAnswers = async () => {
+        if (!user) {
+            setError('Debes iniciar sesión para guardar tus respuestas.');
+            return;
+        }
+
+        try {
+            setIsSaving(true);
+            setSaveSuccess(false);
+            // Convertir respuestas al formato que espera el backend
+            // El backend espera un array de IDs de opciones
+            const opcionesIds = Object.values(answers).map(answer => answer.value);
+            
+            await api.guardarRespuestas(opcionesIds);
+            setSaveSuccess(true);
+        } catch (error) {
+            console.error('Error al guardar respuestas:', error);
+            setSaveSuccess(false);
+            // Mostrar mensaje de error en el modal
+            setError('Error al guardar las respuestas. Por favor, intenta nuevamente.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
     const handleCloseModal = () => {
         setShowCompletionModal(false);
+        // Mostrar pantalla de completado después de cerrar el modal
+        if (saveSuccess) {
+            setShowCompletionScreen(true);
+        }
+        // Limpiar error al cerrar el modal
+        if (error) {
+            setError(null);
+        }
+    };
+
+    const handleRestartQuiz = () => {
+        // Reiniciar el cuestionario
+        setAnswers({});
+        setCurrentQuestionIndex(0);
+        setWaterLevel(0);
+        setShowCompletionScreen(false);
+        setShowCompletionModal(false);
+        setSaveSuccess(false);
+        setError(null);
     };
 
     // Efecto para manejar la tecla Escape y bloquear scroll cuando el modal está abierto
@@ -356,6 +266,152 @@ export default function PreguntasPage() {
         }
     };
 
+    // Mostrar loading
+    if (isLoading) {
+        return (
+            <div className={styles.pageContainer}>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    height: '100vh',
+                    fontSize: '1.5rem',
+                    color: '#004a99',
+                    flexDirection: 'column',
+                    gap: '1rem'
+                }}>
+                    <div style={{ fontSize: '3rem' }}>💧</div>
+                    <div>Cargando preguntas...</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Mostrar error
+    if (error && preguntas.length === 0) {
+        return (
+            <div className={styles.pageContainer}>
+                <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'center', 
+                    alignItems: 'center', 
+                    height: '100vh',
+                    fontSize: '1.5rem',
+                    color: '#ff4444',
+                    flexDirection: 'column',
+                    gap: '1rem',
+                    padding: '2rem',
+                    textAlign: 'center'
+                }}>
+                    <div style={{ fontSize: '3rem' }}>⚠️</div>
+                    <div>{error}</div>
+                    <button 
+                        onClick={() => {
+                            setError(null);
+                            setIsLoading(true);
+                            window.location.reload();
+                        }} 
+                        style={{
+                            marginTop: '1rem',
+                            padding: '0.7rem 1.5rem',
+                            fontSize: '1rem',
+                            backgroundColor: '#004a99',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#0066ff'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = '#004a99'}
+                    >
+                        Recargar página
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Mostrar pantalla de completado
+    if (showCompletionScreen) {
+        return (
+            <div className={styles.pageContainer}>
+                <img src={logoInstitucional} alt="Logo ITL" className={styles.logo} />
+                <div className={styles.completionScreen}>
+                    <div className={styles.completionIcon} style={{ 
+                        backgroundColor: waterLevel >= 75 
+                            ? 'rgba(255, 77, 77, 0.1)' 
+                            : waterLevel >= 50 
+                            ? 'rgba(255, 215, 0, 0.1)' 
+                            : 'rgba(76, 175, 80, 0.1)',
+                        color: getWaterLevelColor()
+                    }}>
+                        {waterLevel >= 75 ? '⚠️' : waterLevel >= 50 ? '⚡' : '✓'}
+                    </div>
+                    <h1 className={styles.completionTitle}>¡Encuesta Completada!</h1>
+                    <p className={styles.completionMessage}>
+                        Gracias por completar el cuestionario de huella hídrica.
+                    </p>
+                    
+                    <div className={styles.completionResults}>
+                        <div className={styles.completionResultCard}>
+                            <span className={styles.completionResultLabel}>Tu Nivel Hídrico:</span>
+                            <span 
+                                className={styles.completionResultValue}
+                                style={{ color: getWaterLevelColor() }}
+                            >
+                                {waterLevel.toFixed(1)}%
+                            </span>
+                        </div>
+                        <div className={styles.completionResultCard}>
+                            <span className={styles.completionResultLabel}>Estado:</span>
+                            <span 
+                                className={styles.completionResultBadge}
+                                style={{ 
+                                    backgroundColor: getWaterLevelColor(),
+                                    color: 'white'
+                                }}
+                            >
+                                {getWaterLevelLabel()}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className={styles.completionDescription}>
+                        {waterLevel >= 75 ? (
+                            <p>Tu consumo de agua es crítico. Te recomendamos implementar medidas de ahorro urgentes.</p>
+                        ) : waterLevel >= 50 ? (
+                            <p>Tu consumo de agua es moderado. Hay espacio para mejorar y optimizar tu uso del agua.</p>
+                        ) : (
+                            <p>¡Excelente! Tu consumo de agua es óptimo. Sigue manteniendo estas buenas prácticas.</p>
+                        )}
+                    </div>
+
+                    <div className={styles.completionActions}>
+                        {isAdmin && (
+                            <button 
+                                className={styles.completionButton}
+                                onClick={() => navigate('/estadisticas')}
+                            >
+                                Ver Estadísticas
+                            </button>
+                        )}
+                        <button 
+                            className={`${styles.completionButton} ${isAdmin ? styles.completionButtonSecondary : ''}`}
+                            onClick={handleRestartQuiz}
+                        >
+                            Realizar Otra Vez
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (!currentQuestion) {
+        return null;
+    }
+
     return (
         <div className={styles.pageContainer}>
             {/* Logo en la esquina superior izquierda */}
@@ -421,10 +477,10 @@ export default function PreguntasPage() {
                             <button
                                 type="button"
                                 onClick={handleNext}
-                                disabled={!selectedAnswer}
+                                disabled={!selectedAnswer || isSaving}
                                 className={styles.buttonSiguiente}
                             >
-                                {currentQuestionIndex === totalQuestions - 1 ? 'Finalizar' : 'Siguiente'}
+                                {isSaving ? 'Guardando...' : currentQuestionIndex === totalQuestions - 1 ? 'Finalizar' : 'Siguiente'}
                             </button>
                         </div>
                     </div>
@@ -503,6 +559,16 @@ export default function PreguntasPage() {
                             <p className={styles.modalMessage}>
                                 Has completado exitosamente el cuestionario de huella hídrica.
                             </p>
+                            {saveSuccess && (
+                                <p style={{ 
+                                    color: '#4CAF50', 
+                                    fontWeight: '600', 
+                                    marginTop: '0.5rem',
+                                    fontSize: '0.95rem'
+                                }}>
+                                    ✅ Tus respuestas han sido guardadas correctamente en la base de datos.
+                                </p>
+                            )}
                             
                             <div className={styles.resultContainer}>
                                 <div className={styles.resultItem}>
@@ -537,6 +603,20 @@ export default function PreguntasPage() {
                                     <p>¡Excelente! Tu consumo de agua es óptimo. Sigue manteniendo estas buenas prácticas.</p>
                                 )}
                             </div>
+                            
+                            {/* Mostrar error si hubo problema al guardar */}
+                            {error && !saveSuccess && (
+                                <div style={{ 
+                                    marginTop: '1rem',
+                                    padding: '0.75rem',
+                                    backgroundColor: '#f8d7da',
+                                    color: '#721c24',
+                                    borderRadius: '8px',
+                                    border: '1px solid #f5c6cb'
+                                }}>
+                                    <strong>⚠️ Error:</strong> {error}
+                                </div>
+                            )}
                         </div>
 
                         <div className={styles.modalFooter}>

@@ -1,14 +1,17 @@
 // src/pages/UsuariosPage.jsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/apiClient';
 import styles from './UsuariosPage.module.css';
 
 export default function UsuariosPage() {
     const { user: currentUser } = useAuth();
     const [usuarios, setUsuarios] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
+    const [searchInput, setSearchInput] = useState(''); // Valor del input (no se usa para filtrar hasta buscar)
+    const [searchTerm, setSearchTerm] = useState(''); // Término de búsqueda real usado en el filtro
     const [filterRol, setFilterRol] = useState('todos');
     const [isLoading, setIsLoading] = useState(true);
+    const [pagination, setPagination] = useState({ total: 0, page: 1, pageSize: 20, totalPages: 0 });
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('create'); // 'create' o 'edit'
     const [selectedUsuario, setSelectedUsuario] = useState(null);
@@ -23,56 +26,76 @@ export default function UsuariosPage() {
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState({ type: '', text: '' });
 
-    // Cargar usuarios desde localStorage (simulación de API)
-    useEffect(() => {
-        loadUsuarios();
-    }, []);
-
-    const loadUsuarios = () => {
+    // Función para cargar usuarios desde el backend
+    const loadUsuarios = useCallback(async () => {
         setIsLoading(true);
         try {
-            // Simular carga de usuarios desde localStorage
-            const savedUsuarios = localStorage.getItem('usuarios');
-            if (savedUsuarios) {
-                setUsuarios(JSON.parse(savedUsuarios));
-            } else {
-                // Datos de ejemplo
-                const ejemploUsuarios = [
-                    {
-                        id: 1,
-                        usuario: 'admin',
-                        correo: 'admin@example.com',
-                        rol: 'administrador',
-                        sexo: 'masculino',
-                        nivelEducativo: 'universitario',
-                        fechaRegistro: new Date().toISOString()
-                    },
-                    {
-                        id: 2,
-                        usuario: 'usuario1',
-                        correo: 'usuario1@example.com',
-                        rol: 'usuario',
-                        sexo: 'femenino',
-                        nivelEducativo: 'preparatoria',
-                        fechaRegistro: new Date().toISOString()
-                    }
-                ];
-                setUsuarios(ejemploUsuarios);
-                localStorage.setItem('usuarios', JSON.stringify(ejemploUsuarios));
+            const filters = {
+                page: pagination.page,
+                pageSize: pagination.pageSize
+            };
+            
+            // Agregar filtro de búsqueda si existe
+            if (searchTerm.trim()) {
+                filters.q = searchTerm.trim();
             }
+            
+            // Agregar filtro de rol si no es "todos"
+            // El backend espera 'admin' pero el frontend usa 'administrador'
+            if (filterRol !== 'todos') {
+                filters.rol = filterRol === 'administrador' ? 'admin' : filterRol;
+            }
+            
+            const response = await api.getUsuarios(filters);
+            
+            // Mapear los datos del backend al formato del frontend
+            const usuariosMapeados = response.data.map(usuario => ({
+                id: usuario.id,
+                usuario: usuario.nombre,
+                correo: usuario.email,
+                rol: usuario.rol === 'admin' ? 'administrador' : usuario.rol, // Mapear 'admin' a 'administrador'
+                sexo: usuario.sexo || '',
+                nivelEducativo: usuario.nivel_educativo || '',
+                fechaRegistro: usuario.fecha_registro
+            }));
+            
+            setUsuarios(usuariosMapeados);
+            setPagination(response.pagination);
         } catch (error) {
             console.error('Error al cargar usuarios:', error);
-            setMessage({ type: 'error', text: 'Error al cargar usuarios' });
+            setMessage({ 
+                type: 'error', 
+                text: error.message || 'Error al cargar usuarios. Por favor, intenta nuevamente.' 
+            });
+            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
         } finally {
             setIsLoading(false);
         }
+    }, [searchTerm, filterRol, pagination.page, pagination.pageSize]);
+
+    // Resetear a página 1 cuando cambian los filtros
+    useEffect(() => {
+        setPagination(prev => ({ ...prev, page: 1 }));
+    }, [searchTerm, filterRol]);
+
+    // Cargar usuarios cuando cambian los filtros (sin debounce para búsqueda)
+    useEffect(() => {
+        loadUsuarios();
+    }, [filterRol, pagination.page, pagination.pageSize, loadUsuarios]);
+
+    // Función para ejecutar la búsqueda
+    const handleSearch = () => {
+        setSearchTerm(searchInput.trim());
+        setPagination(prev => ({ ...prev, page: 1 }));
     };
 
-    // Guardar usuarios en localStorage
-    const saveUsuarios = (newUsuarios) => {
-        localStorage.setItem('usuarios', JSON.stringify(newUsuarios));
-        setUsuarios(newUsuarios);
+    // Función para manejar Enter en el input de búsqueda
+    const handleSearchKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
     };
+
 
     // Validar formulario
     const validateForm = () => {
@@ -120,93 +143,124 @@ export default function UsuariosPage() {
     };
 
     // Abrir modal para editar usuario
-    const handleEdit = (usuario) => {
-        setModalMode('edit');
-        setSelectedUsuario(usuario);
-        setFormData({
-            usuario: usuario.usuario,
-            correo: usuario.correo,
-            contrasena: '', // No mostrar contraseña
-            rol: usuario.rol,
-            sexo: usuario.sexo || '',
-            nivelEducativo: usuario.nivelEducativo || ''
-        });
-        setErrors({});
-        setMessage({ type: '', text: '' });
-        setShowModal(true);
+    const handleEdit = async (usuario) => {
+        try {
+            setIsLoading(true);
+            // Obtener datos completos del usuario desde el backend
+            const usuarioCompleto = await api.getUsuario(usuario.id);
+            
+            setModalMode('edit');
+            setSelectedUsuario(usuario);
+            setFormData({
+                usuario: usuarioCompleto.nombre || usuario.usuario,
+                correo: usuarioCompleto.email || usuario.correo,
+                contrasena: '', // No mostrar contraseña
+                rol: usuarioCompleto.rol === 'admin' ? 'administrador' : usuarioCompleto.rol || usuario.rol,
+                sexo: usuarioCompleto.sexo || usuario.sexo || '',
+                nivelEducativo: usuarioCompleto.nivel_educativo || usuario.nivelEducativo || ''
+            });
+            setErrors({});
+            setMessage({ type: '', text: '' });
+            setShowModal(true);
+        } catch (error) {
+            console.error('Error al cargar usuario:', error);
+            setMessage({ 
+                type: 'error', 
+                text: 'Error al cargar los datos del usuario. Por favor, intenta nuevamente.' 
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     // Guardar usuario (crear o editar)
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!validateForm()) {
             return;
         }
 
         try {
-            let newUsuarios = [...usuarios];
+            setIsLoading(true);
             
-            if (modalMode === 'create') {
-                const newUsuario = {
-                    id: Date.now(),
-                    ...formData,
-                    fechaRegistro: new Date().toISOString()
-                };
-                newUsuarios.push(newUsuario);
-                setMessage({ type: 'success', text: 'Usuario creado exitosamente' });
-            } else {
-                const index = newUsuarios.findIndex(u => u.id === selectedUsuario.id);
-                if (index !== -1) {
-                    newUsuarios[index] = {
-                        ...newUsuarios[index],
-                        usuario: formData.usuario,
-                        correo: formData.correo,
-                        rol: formData.rol,
-                        sexo: formData.sexo,
-                        nivelEducativo: formData.nivelEducativo,
-                        ...(formData.contrasena && { contrasena: formData.contrasena })
-                    };
-                    setMessage({ type: 'success', text: 'Usuario actualizado exitosamente' });
-                }
+            // Mapear campos del frontend al backend
+            const userData = {
+                nombre: formData.usuario,
+                email: formData.correo,
+                sexo: formData.sexo || null,
+                nivel_educativo: formData.nivelEducativo || null,
+                rol: formData.rol === 'administrador' ? 'admin' : formData.rol
+            };
+            
+            // Solo incluir password si se proporcionó
+            if (formData.contrasena && formData.contrasena.trim()) {
+                userData.password = formData.contrasena;
             }
             
-            saveUsuarios(newUsuarios);
+            if (modalMode === 'create') {
+                // Validar que la contraseña esté presente al crear
+                if (!formData.contrasena || !formData.contrasena.trim()) {
+                    setErrors({ contrasena: 'La contraseña es requerida para crear un usuario' });
+                    setIsLoading(false);
+                    return;
+                }
+                
+                await api.crearUsuario(userData);
+                setMessage({ type: 'success', text: 'Usuario creado exitosamente' });
+            } else {
+                // Actualizar usuario existente
+                await api.actualizarUsuario(selectedUsuario.id, userData);
+                setMessage({ type: 'success', text: 'Usuario actualizado exitosamente' });
+            }
+            
             setShowModal(false);
+            // Recargar la lista de usuarios
+            await loadUsuarios();
             setTimeout(() => setMessage({ type: '', text: '' }), 3000);
         } catch (error) {
-            setMessage({ type: 'error', text: 'Error al guardar usuario' });
+            console.error('Error al guardar usuario:', error);
+            setMessage({ 
+                type: 'error', 
+                text: error.message || 'Error al guardar usuario. Por favor, intenta nuevamente.' 
+            });
+            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     // Eliminar usuario
-    const handleDelete = (usuario) => {
+    const handleDelete = async (usuario) => {
         if (usuario.id === currentUser?.id) {
             setMessage({ type: 'error', text: 'No puedes eliminar tu propio usuario' });
             setTimeout(() => setMessage({ type: '', text: '' }), 3000);
             return;
         }
 
-        if (window.confirm(`¿Estás seguro de eliminar al usuario "${usuario.usuario}"?`)) {
-            try {
-                const newUsuarios = usuarios.filter(u => u.id !== usuario.id);
-                saveUsuarios(newUsuarios);
-                setMessage({ type: 'success', text: 'Usuario eliminado exitosamente' });
-                setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-            } catch (error) {
-                setMessage({ type: 'error', text: 'Error al eliminar usuario' });
-            }
+        if (!window.confirm(`¿Estás seguro de eliminar al usuario "${usuario.usuario}"?`)) {
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            await api.eliminarUsuario(usuario.id);
+            setMessage({ type: 'success', text: 'Usuario eliminado exitosamente' });
+            // Recargar la lista de usuarios
+            await loadUsuarios();
+            setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+        } catch (error) {
+            console.error('Error al eliminar usuario:', error);
+            setMessage({ 
+                type: 'error', 
+                text: error.message || 'Error al eliminar usuario. Por favor, intenta nuevamente.' 
+            });
+            setTimeout(() => setMessage({ type: '', text: '' }), 5000);
+        } finally {
+            setIsLoading(false);
         }
     };
 
-    // Filtrar usuarios
-    const filteredUsuarios = usuarios.filter(usuario => {
-        const matchesSearch = 
-            usuario.usuario.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            usuario.correo.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesRol = filterRol === 'todos' || usuario.rol === filterRol;
-        
-        return matchesSearch && matchesRol;
-    });
+    // Los usuarios ya vienen filtrados del backend
+    const filteredUsuarios = usuarios;
 
     if (isLoading) {
         return (
@@ -234,10 +288,18 @@ export default function UsuariosPage() {
                     <input
                         type="text"
                         placeholder="Buscar por usuario o correo..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
+                        onKeyPress={handleSearchKeyPress}
                         className={styles.searchInput}
                     />
+                    <button 
+                        onClick={handleSearch}
+                        className={styles.searchButton}
+                        title="Buscar"
+                    >
+                        🔍
+                    </button>
                 </div>
                 <div className={styles.filters}>
                     <select
@@ -321,6 +383,30 @@ export default function UsuariosPage() {
                 </table>
             </div>
 
+            {/* Paginación */}
+            {pagination.totalPages > 1 && (
+                <div className={styles.pagination}>
+                    <button
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
+                        disabled={pagination.page === 1 || isLoading}
+                        className={styles.paginationButton}
+                    >
+                        ← Anterior
+                    </button>
+                    <span className={styles.paginationInfo}>
+                        Página {pagination.page} de {pagination.totalPages} 
+                        ({pagination.total} usuarios totales)
+                    </span>
+                    <button
+                        onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
+                        disabled={pagination.page >= pagination.totalPages || isLoading}
+                        className={styles.paginationButton}
+                    >
+                        Siguiente →
+                    </button>
+                </div>
+            )}
+
             {/* Modal para crear/editar usuario */}
             {showModal && (
                 <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
@@ -388,6 +474,7 @@ export default function UsuariosPage() {
                                     <option value="masculino">Masculino</option>
                                     <option value="femenino">Femenino</option>
                                     <option value="otro">Otro</option>
+                                    <option value="prefiero_no_decir">Prefiero no decir</option>
                                 </select>
                             </div>
                             <div className={styles.formGroup}>
@@ -397,10 +484,12 @@ export default function UsuariosPage() {
                                     onChange={(e) => setFormData({ ...formData, nivelEducativo: e.target.value })}
                                 >
                                     <option value="">Seleccionar...</option>
+                                    <option value="primaria">Primaria</option>
                                     <option value="secundaria">Secundaria</option>
-                                    <option value="preparatoria">Preparatoria</option>
+                                    <option value="tecnico">Técnico</option>
                                     <option value="universitario">Universitario</option>
-                                    <option value="posgrado">Posgrado</option>
+                                    <option value="postgrado">Postgrado</option>
+                                    <option value="otro">Otro</option>
                                 </select>
                             </div>
                         </div>
