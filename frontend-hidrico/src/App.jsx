@@ -17,30 +17,42 @@ function App() {
     <div className={styles.appContainer}>
       {/* RF10: Menú superior con enlaces */}
       <nav className={styles.nav}>
-        <Link 
-          to="/registro" 
-          className={`${styles.navLink} ${isActive('/registro') ? styles.active : ''}`}
-        >
-          Registro
-        </Link>
-        <Link 
-          to="/preguntas" 
-          className={`${styles.navLink} ${isActive('/preguntas') ? styles.active : ''}`}
-        >
-          Preguntas
-        </Link>
-        {!isLoading && isAdmin && (
+        {!isLoading && !user && (
           <Link 
-            to="/usuarios" 
-            className={`${styles.navLink} ${isActive('/usuarios') ? styles.active : ''}`}
+            to="/registro" 
+            className={`${styles.navLink} ${isActive('/registro') ? styles.active : ''}`}
           >
-            Usuarios
+            Registro
           </Link>
+        )}
+        {!isLoading && user && (
+          <Link 
+            to="/preguntas" 
+            className={`${styles.navLink} ${isActive('/preguntas') ? styles.active : ''}`}
+          >
+            Preguntas
+          </Link>
+        )}
+        {!isLoading && isAdmin && (
+          <>
+            <Link 
+              to="/estadisticas" 
+              className={`${styles.navLink} ${isActive('/estadisticas') ? styles.active : ''}`}
+            >
+              Estadísticas
+            </Link>
+            <Link 
+              to="/usuarios" 
+              className={`${styles.navLink} ${isActive('/usuarios') ? styles.active : ''}`}
+            >
+              Usuarios
+            </Link>
+          </>
         )}
         {!isLoading && user ? (
           <>
             <span className={styles.userInfo}>
-              {user.usuario} ({user.rol})
+              {user.nombre || user.usuario} {user.rol ? `(${user.rol})` : ''}
             </span>
             <button onClick={logout} className={styles.logoutButton}>
               Cerrar Sesión

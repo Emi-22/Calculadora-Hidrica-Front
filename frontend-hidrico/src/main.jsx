@@ -14,7 +14,9 @@ import App from './App.jsx'; // El layout principal
 import RegistroPage from './pages/RegistroPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RecuperarPasswordPage from './pages/RecuperarPasswordPage.jsx';
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 import PreguntasPage from './pages/PreguntasPage.jsx';
+import EstadisticasPage from './pages/EstadisticasPage.jsx';
 import UsuariosPage from './pages/UsuariosPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -37,8 +39,20 @@ const router = createBrowserRouter([
         element: <RecuperarPasswordPage />,
       },
       {
+        path: 'reset-password',
+        element: <ResetPasswordPage />,
+      },
+      {
         path: 'preguntas',
         element: <PreguntasPage />,
+      },
+      {
+        path: 'estadisticas',
+        element: (
+          <ProtectedRoute requireAdmin={true}>
+            <EstadisticasPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'usuarios',

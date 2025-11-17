@@ -47,33 +47,6 @@
   transform: translateY(0);
 }
 
-/* Información del usuario */
-.userInfo {
-  color: white;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-}
-
-/* Botón de cerrar sesión */
-.logoutButton {
-  background-color: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.logoutButton:hover {
-  background-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
 /* Estado activo para el enlace de la página actual */
 .navLink.active {
   color: #004a99;
@@ -87,32 +60,42 @@
   background-color: rgba(179, 224, 247, 0.5);
 }
 
-/* Información del usuario */
+/* Información del usuario - MEJORADA VISIBILIDAD */
 .userInfo {
-  color: white;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  color: #004a99;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 0.7rem 1.3rem;
+  background-color: rgba(179, 224, 247, 0.7);
+  border-radius: 10px;
+  border: 2px solid rgba(0, 74, 153, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 74, 153, 0.2);
+  white-space: nowrap;
 }
 
-/* Botón de cerrar sesión */
+/* Botón de cerrar sesión - MEJORADA VISIBILIDAD */
 .logoutButton {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: #ff4444;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  border: 2px solid #cc0000;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0.7rem 1.3rem;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
 }
 
 .logoutButton:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+  background-color: #ff6666;
+  border-color: #ff0000;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
+}
+
+.logoutButton:active {
+  transform: translateY(0);
 }
 
 /* Contenedor principal (main) */

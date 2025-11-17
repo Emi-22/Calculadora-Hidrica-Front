@@ -816,3 +816,235 @@
   }
 }
 
+/* --- Pantalla de Completado --- */
+.completionScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 3rem 2rem;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.completionIcon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  margin-bottom: 2rem;
+  border: 4px solid currentColor;
+  animation: scaleIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.2s both;
+}
+
+.completionTitle {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #004a99;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.5px;
+}
+
+.completionMessage {
+  font-size: 1.2rem;
+  color: #666;
+  margin: 0 0 2.5rem 0;
+  line-height: 1.6;
+}
+
+.completionResults {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.completionResultCard {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 180px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.completionResultCard:hover {
+  transform: translateY(-5px);
+}
+
+.completionResultLabel {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.completionResultValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.completionResultBadge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.completionDescription {
+  background: rgba(0, 74, 153, 0.05);
+  border-left: 4px solid #004a99;
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+  max-width: 600px;
+}
+
+.completionDescription p {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #555;
+  line-height: 1.7;
+}
+
+.completionActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.completionButton {
+  background: linear-gradient(135deg, #004a99 0%, #0066ff 100%);
+  color: white;
+  font-weight: 600;
+  font-size: 1.05rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 74, 153, 0.3);
+  min-width: 180px;
+}
+
+.completionButton:hover {
+  background: linear-gradient(135deg, #003366 0%, #004a99 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 74, 153, 0.4);
+}
+
+.completionButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 74, 153, 0.3);
+}
+
+.completionButtonSecondary {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.completionButtonSecondary:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.completionButtonOutline {
+  background: transparent;
+  color: #004a99;
+  border: 2px solid #004a99;
+  box-shadow: none;
+}
+
+.completionButtonOutline:hover {
+  background: rgba(0, 74, 153, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 74, 153, 0.2);
+}
+
+/* Responsive para pantalla de completado */
+@media (max-width: 768px) {
+  .completionScreen {
+    padding: 2rem 1rem;
+    min-height: 70vh;
+  }
+
+  .completionIcon {
+    width: 100px;
+    height: 100px;
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .completionTitle {
+    font-size: 2rem;
+  }
+
+  .completionMessage {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+
+  .completionResults {
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    width: 100%;
+  }
+
+  .completionResultCard {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .completionResultValue {
+    font-size: 2rem;
+  }
+
+  .completionDescription {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .completionDescription p {
+    font-size: 1rem;
+  }
+
+  .completionActions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .completionButton {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
