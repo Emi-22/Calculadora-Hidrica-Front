@@ -395,17 +395,6 @@ interface Usuario {
 
 ---
 
-## 🚀 Próximos Pasos para Integración
-
-1. Crear servicio de API (`src/services/api.js`)
-2. Reemplazar llamadas a `localStorage` por llamadas a API
-3. Implementar manejo de errores de red
-4. Agregar interceptor para refrescar tokens
-5. Implementar logout automático en caso de token expirado
-6. Agregar tests unitarios
-
----
-
 ## 📞 Soporte
 
 Para cualquier duda sobre la implementación o integración con el backend, revisar los comentarios en el código o consultar esta documentación.
