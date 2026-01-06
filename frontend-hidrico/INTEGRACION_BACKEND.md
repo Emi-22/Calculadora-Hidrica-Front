@@ -196,19 +196,3 @@ server: {
 }
 ```
 
-Esto evita problemas de CORS en desarrollo.
-
-## ⚠️ Notas Importantes
-
-1. **Valores de Sexo permitidos:** `masculino`, `femenino`, `otro`, `prefiero_no_decir`
-2. **Valores de Nivel Educativo permitidos:** `primaria`, `secundaria`, `tecnico`, `universitario`, `postgrado`, `otro`
-3. El backend normaliza estos valores a minúsculas y reemplaza espacios con guiones bajos
-4. El campo `rol` no está implementado en el backend actual, se asume `usuario` por defecto
-
-## 🚀 Próximos Pasos
-
-- [ ] Implementar refresh token para renovar tokens expirados
-- [ ] Agregar manejo de roles en el backend
-- [ ] Implementar endpoint para recuperar contraseña
-- [ ] Agregar validación de tokens al cargar la aplicación
-
